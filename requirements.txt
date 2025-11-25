@@ -9,3 +9,4 @@ schedule
 lxml
 fastparquet
 pyarrow
+apache-airflow

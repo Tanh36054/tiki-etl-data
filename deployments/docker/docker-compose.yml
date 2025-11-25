@@ -1,7 +1,43 @@
 version: '3.8'
+
+x-airflow-common: &airflow-common
+  build: 
+    context: ../../
+    dockerfile: deployments/docker/Dockerfile 
+  environment:
+    &postgres-connection-settings
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://dev:devpass@postgres:5432/ecommerce
+    AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS: 'False'
+    AIRFLOW__WEBSERVER__RBAC: 'True'
+    AIRFLOW__WEBSERVER__SECRET_KEY: 'tiki_secret_key'
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'False' 
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/dags
+    AIRFLOW__CORE__DEFAULT_TIMEZONE: Asia/Ho_Chi_Minh
+    GCS_BUCKET: my-ecommerce-dev-bucket
+
+    GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/secrets/ecommerce-sa.json
+  
+  working_dir: /opt/airflow
+  restart: always
+  
+  
+  user: "${AIRFLOW_UID:-50000}:0"
+
+  volumes:
+    - ../../dags:/opt/airflow/dags
+    - ../../logs:/opt/airflow/logs
+    - ../../src:/opt/airflow/src
+    - ../../scripts:/opt/airflow/scripts
+    - ../../data:/opt/airflow/data
+
+    - /home/tanh/.gcp_keys/ecommerce-sa.json:/opt/airflow/secrets/ecommerce-sa.json
+
 services:
+  # --- 1. POSTGRES DATABASE ---
   postgres:
     image: postgres:15
+    container_name: postgres
     environment:
       POSTGRES_USER: dev
       POSTGRES_PASSWORD: devpass
@@ -9,6 +45,59 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - pgdata:/var/lib/postgressql/data
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 50
+
+  # --- 2. AIRFLOW INIT ---
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow_init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        airflow db migrate && \
+        airflow users create \
+          --username airflow \
+          --password airflow \
+          --firstname Airflow \
+          --lastname Admin \
+          --role Admin \
+          --email admin@example.com \
+          -r Admin || true
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # --- 3. AIRFLOW WEBSERVER ---
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow_webserver
+    command: webserver
+    ports:
+      - "8080:8080" 
+    depends_on:
+      - postgres
+      - airflow-init
+    healthcheck:
+      test: ["CMD-SHELL", "[ -f /opt/airflow/airflow-webserver.pid ]"]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+  # --- 4. AIRFLOW SCHEDULER ---
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow_webserver_scheduler
+    command: scheduler
+    depends_on:
+      - postgres
+      - airflow-init
+
 volumes:
   pgdata:
