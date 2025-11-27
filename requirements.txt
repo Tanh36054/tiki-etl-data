@@ -10,3 +10,4 @@ lxml
 fastparquet
 pyarrow
 apache-airflow
+kafka-python

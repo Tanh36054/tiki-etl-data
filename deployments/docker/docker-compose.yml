@@ -33,6 +33,9 @@ x-airflow-common: &airflow-common
 
     - /home/tanh/.gcp_keys/ecommerce-sa.json:/opt/airflow/secrets/ecommerce-sa.json
 
+  networks:
+    - data-network
+
 services:
   # --- 1. POSTGRES DATABASE ---
   postgres:
@@ -51,6 +54,9 @@ services:
       interval: 5s
       timeout: 5s
       retries: 50
+    
+    networks:
+      - data-network
 
   # --- 2. AIRFLOW INIT ---
   airflow-init:
@@ -73,6 +79,9 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    
+    networks:
+      - data-network
 
   # --- 3. AIRFLOW WEBSERVER ---
   airflow-webserver:
@@ -89,6 +98,9 @@ services:
       interval: 30s
       timeout: 30s
       retries: 3
+    
+    networks:
+      - data-network
 
   # --- 4. AIRFLOW SCHEDULER ---
   airflow-scheduler:
@@ -98,6 +110,13 @@ services:
     depends_on:
       - postgres
       - airflow-init
+    
+    networks:
+      - data-network
 
 volumes:
   pgdata:
+
+networks:
+  data-network:
+    external: true
