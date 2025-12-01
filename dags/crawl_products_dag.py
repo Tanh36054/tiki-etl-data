@@ -15,7 +15,6 @@ try:
 except Exception as e:
     print(f"Lỗi import: {e}. Hãy kiểm tra lại cấu trúc thư mục.")
     
-#cau hinh chung
 default_args = {
     'owner': 'airflow',
     'start_date': days_ago(1),
@@ -26,7 +25,7 @@ def run_crawler(**kwargs):
     """
     Task 1: crawl dữ liệu -> lưu xuống file local -> return đường dẫn file
     """
-    keyword = "tai nghe bluetooth"
+    keyword = "quần áo nam"
     
     # 1.Gọi API & Parse
     print(f"Bắt đầu crawl dữ liệu...")
@@ -37,7 +36,6 @@ def run_crawler(**kwargs):
         raise ValueError("Không có sản phẩm nào được crawl.")
     
     # 2.Lưu file xuống thư mục tạm (/tmp) của worker
-    # Dùng timestamp để file không bị trùng
     now = datetime.datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%SZ")
     filename = f"tiki_raw_{now}.json"
     file_path = f"/tmp/{filename}"
@@ -48,7 +46,6 @@ def run_crawler(**kwargs):
     print(f"Đã lưu file tạm tại: {file_path}")
     
     # 3. Đẩy đường dẫn file sang Task tiếp theo bằng XCom
-    # Key mặc định là "return_value"
     return file_path
 
 def upload_to_gcs(**kwargs):

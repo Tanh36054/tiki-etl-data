@@ -77,22 +77,22 @@ def upload_to_gcs(data, vendor):
     blod.upload_from_filename(local_path)
     print("Upload thành công: gs://{}/{}".format(GCS_BUCKET, dest))
     
-def main():
-    keyword = "tai nghe bluetooth"
-    try:
-        #1. goi API
-        json_data = fetch_tiki_search(keyword, page=1)
+# def main():
+#     keyword = "mỹ phẩm nữ"
+#     try:
+#         #1. goi API
+#         json_data = fetch_tiki_search(keyword, page=1)
         
-        #2. parse Json
-        items = parse_tiki_api_data(json_data)
+#         #2. parse Json
+#         items = parse_tiki_api_data(json_data)
         
-        #3. upload neu co du lieu
-        if items:
-            upload_to_gcs(items, "tiki")
-        else:
-            print("Không có dữ liệu để upload")
-    except Exception as e:
-        print("Lỗi nghiêm trọng: {e}")
+#         #3. upload neu co du lieu
+#         if items:
+#             upload_to_gcs(items, "tiki")
+#         else:
+#             print("Không có dữ liệu để upload")
+#     except Exception as e:
+#         print("Lỗi nghiêm trọng: {e}")
     
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
