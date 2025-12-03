@@ -1,71 +1,75 @@
 import sys
 import os
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, input_file_name, lit
+import pyspark.sql.functions as F 
 
+# --- CẤU HÌNH CHUNG ---
 BUCKET_NAME = "my-ecommerce-dev-bucket"
-
 KEY_PATH = "/home/tanh/.gcp_keys/ecommerce-sa.json"
 
-RAW_PATH = f"gs://{BUCKET_NAME}/raw/order_raw/*/*.jsonl"   
+RAW_ORDERS = f"gs://{BUCKET_NAME}/raw/order_raw/*/*.jsonl"
+BRONZE_ORDERS = f"gs://{BUCKET_NAME}/bronze/order_events/"
 
-BRONZE_PATH = f"gs://{BUCKET_NAME}/bronze/order_events/"
+RAW_USERS = f"gs://{BUCKET_NAME}/raw/users/*/*.json"
+BRONZE_USERS = f"gs://{BUCKET_NAME}/bronze/users/"
+
+RAW_PRODUCTS = f"gs://{BUCKET_NAME}/raw/products/*/*/*.json"
+BRONZE_PRODUCTS = f"gs://{BUCKET_NAME}/bronze/products/"
+
 
 def create_spark_session():
-    """
-    Khoi tao Spark session voi cau hinh GCS connector
-    """
     spark = SparkSession.builder \
-        .appName("ETL_Raw_To_Bronze") \
+        .appName("ETL_Raw_To_Bronze_Multi_Source") \
         .config("spark.hadoop.google.cloud.auth.service.account.enable", "true") \
         .config("spark.hadoop.google.cloud.auth.service.account.json.keyfile", KEY_PATH) \
         .config("spark.hadoop.fs.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem") \
         .config("spark.hadoop.fs.AbstractFileSystem.gs.impl", "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem") \
         .getOrCreate()
-    return spark 
+    return spark
 
-def process_raw_to_bronze():
-    spark = create_spark_session()
-    
-    print("Đang đọc dữ liệu từ: {RAW_PATH}")
-    
-    # 1. Đọc dữ liệu JSON/JSONL
+def process_single_table(spark, table_name, input_path, output_path, is_multiline=False):
+
+    print(f"Đang xử lý bảng: {table_name}")
+    print(f"Input: {input_path}")
+    print(f"Multiline Mode: {is_multiline}")
+
     try:
-        df = spark.read.json(RAW_PATH)
-    except Exception as e:
-        print(f"Lỗi khi đọc file (Có thể chưa có data): {e}")
-        spark.stop()
-        return
-    
-    if df.rdd.isEmpty():
-        print("Không có dữ liêu mới để xử lý.")
-        spark.stop()
-        return
-    
-    print("Schema gốc của dữ liệu")
-    df.printSchema()
-    
-    # 2. Transform (Thêm Metadata)
-    df_transformed = df.withColumn("ingestion_date", current_timestamp()) \
-                       .withColumn("source_file", input_file_name()) \
-                       .withColumn("data_source", lit("kafka_order_events"))
-                    
-    # 3. Ghi dữ liệu ra Bronze(Parquet)
-    print(f"Đang ghi dữ liệu ra: {BRONZE_PATH}")
-    
-    df_transformed.write \
-        .mode("append") \
-        .format("parquet") \
-        .save(BRONZE_PATH)
+        reader = spark.read.option("recursiveFileLookup", "true")
         
-    print("Hoàn thành ETL Raw -> Bronze.")
-    spark.stop()
-    
-if __name__ == "__main__":
+        if is_multiline:
+            reader = reader.option("multiline", "true")
+            
+        df = reader.json(input_path)
+        
+        if df.rdd.isEmpty():
+            print(f"   ⚠️ Cảnh báo: Không có dữ liệu tại {input_path}")
+            return
+
+        df_transformed = df.withColumn("ingest_time", F.current_timestamp()) \
+                           .withColumn("source_file", F.input_file_name()) \
+                           .withColumn("data_source", F.lit(table_name))
+
+        df_transformed.write \
+            .mode("append") \
+            .format("parquet") \
+            .save(output_path)
+            
+        print(f"Đã ghi xong: {output_path}")
+        
+    except Exception as e:
+        print(f"Lỗi khi xử lý {table_name}: {e}")
+
+def main():
     if not os.path.exists(KEY_PATH):
         print(f"Không tìm thấy key tại: {KEY_PATH}")
         sys.exit(1)
-        
-    process_raw_to_bronze()
-    
-    
+
+    spark = create_spark_session()
+    process_single_table(spark, "order_events", RAW_ORDERS, BRONZE_ORDERS, is_multiline=False)
+    process_single_table(spark, "users", RAW_USERS, BRONZE_USERS, is_multiline=True)
+    process_single_table(spark, "products", RAW_PRODUCTS, BRONZE_PRODUCTS, is_multiline=True)
+    print("Hoàn thành toàn bộ job")
+    spark.stop()
+
+if __name__ == "__main__":
+    main()
