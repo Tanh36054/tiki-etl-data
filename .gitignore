@@ -1,0 +1,81 @@
+# ======================================
+# Python
+# ======================================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.sqlite
+
+# ======================================
+# Virtual environment
+# ======================================
+.venv/
+env/
+venv/
+
+# ======================================
+# Airflow
+# ======================================
+logs/
+airflow.log
+airflow.cfg
+webserver_config.py
+*/logs/*
+*dag_processor_manager.log
+*/scheduler/*
+
+# ======================================
+# Kafka / Streaming
+# ======================================
+kafka-logs/
+zookeeper/
+*.avro
+*.snappy
+
+# ======================================
+# Data files (local only, keep GCS clean)
+# put your local data here, but DO NOT push to GitHub
+data/
+*/data/*
+*.parquet
+*.gz
+*.csv
+*.json
+
+# ======================================
+# Credentials (VERY IMPORTANT)
+# ======================================
+*.env
+.env.*
+*credentials*.json
+*service_account*.json
+gcloud_key.json
+google-credentials.json
+
+# ======================================
+# Docker
+# ======================================
+**/docker/data/*
+**/docker/volumes/*
+**/docker/logs/*
+.docker/
+docker-compose.override.yml
+
+# ======================================
+# Notebooks checkpoints
+# ======================================
+.ipynb_checkpoints/
+
+# ======================================
+# VSCode
+# ======================================
+.vscode/
+*.code-workspace
+
+# ======================================
+# OS generated
+# ======================================
+.DS_Store
+Thumbs.db

@@ -33,14 +33,11 @@ def fetch_tiki_search(keyword, page = 1):
     r = requests.get(url, headers=headers, params=params, timeout=20)
     r.raise_for_status()
     
-    # trả về JSON object thay vì text HTML
     return r.json()
 
 def parse_tiki_api_data(json_data):
-    #------thay doi xu ly json truc tiep--------
     items = []
     
-    #du lieu san pham nam trong key "data" cua json tra ve
     products = json_data.get("data", [])
     
     if not products:

@@ -3,7 +3,6 @@ import os
 from pyspark.sql import SparkSession
 import pyspark.sql.functions as F 
 
-# --- CẤU HÌNH CHUNG ---
 BUCKET_NAME = "my-ecommerce-dev-bucket"
 KEY_PATH = "/home/tanh/.gcp_keys/ecommerce-sa.json"
 
