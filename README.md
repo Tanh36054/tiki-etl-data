@@ -17,6 +17,8 @@ Nền tảng sử dụng:
 | Orchestration           | Airflow                             |
 | Deployment              | Docker Compose                      |
 | ----------------------- | ----------------------------------- |
+
+
 Hệ thống được thiết kế để:
 - Thu thập dữ liệusản phẩm/giá từ nhiều nguồn(batch & streaming)
 - Xây dựng Data Lake với các tầng:
@@ -122,6 +124,7 @@ TIKI-ETL-DATA/
 │   │
 │   └── batch/
 │       ├── utils/
+│       │   ├── spark_session.py
 │       ├── check_gold_data.py
 │       ├── transform_bronze_to_silver.py
 │       └── transform_silver_to_gold.py
@@ -133,21 +136,26 @@ TIKI-ETL-DATA/
 └── requirements.txt
 ```
 📦 4. Cách chạy project
+
 4.1. 🔧 Cài đặt môi trường
 Yêu cầu:
 - Docker + Docker Compose
 - Python 3.12+
 - GCP service account key(JSON)
+
 4.2. 🔥 Khởi động hệ thống
 cd deployments/docker
+
 docker-compose up -d
 
 cd deployments/kafka
+
 docker-compose up -d
 
 Dịch vụ được bật:
 - Airflow Webserver (localhost:8080)
 - Kafka + Zookeeper
+  
 4.3. 🌐 Thiết lập biến môi trường
 python -m venv .venv
 
