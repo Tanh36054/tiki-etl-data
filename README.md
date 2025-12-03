@@ -7,16 +7,16 @@ Dự án này mô phỏng một Data Platform chuẩn doanh nghiệp, xử lý c
 
 Nền tảng sử dụng:
 
-| Thành phần            | Công nghệ                         |
-|-----------------------|-----------------------------------|
-| Data Ingestion        | Python, Airflow, Kafka            |
-| Data Lake             | Google Cloud Storage (GCS)        |
-| Batch Processing      | PySpark                           |
-| Streaming Processing  | Kafka Consumer → GCS              |
-| Data Warehouse        | BigQuery                          |
-| Orchestration         | Airflow                           |
-| Deployment            | Docker Compose                    |
-|-----------------------|-----------------------------------|
+| Thành phần              | Công nghệ                           |
+| ----------------------- | ----------------------------------- |
+| Data Ingestion          | Python, Airflow, Kafka              |
+| Data Lake               | Google Cloud Storage (GCS)          |
+| Batch Processing        | PySpark                             |
+| Streaming Processing    | Kafka Consumer → GCS                |
+| Data Warehouse          | BigQuery                            |
+| Orchestration           | Airflow                             |
+| Deployment              | Docker Compose                      |
+| ----------------------- | ----------------------------------- |
 Hệ thống được thiết kế để:
 - Thu thập dữ liệusản phẩm/giá từ nhiều nguồn(batch & streaming)
 - Xây dựng Data Lake với các tầng:
@@ -34,6 +34,7 @@ Hệ thống được thiết kế để:
 - Viết báo cáo phân tích thử nghiệm bằng SQL
 
 🧱 2. Kiến trúc tổng quan
+```text
                 ┌───────────────────────────────┐
                 │  External Sources / API / Web │
                 └───────────────┬───────────────┘
@@ -62,8 +63,10 @@ Hệ thống được thiết kế để:
                               │
                           BigQuery DWH
                       Fact + Dimensions
+```
 
 🗂 3. Cấu trúc thư mục(dự kiến khi hoàn thành)
+```text
 TIKI-ETL-DATA/
 │
 ├── configs/                      # Config chung (API keys, constants…)
@@ -128,7 +131,7 @@ TIKI-ETL-DATA/
 ├── .gitignore
 ├── README.md
 └── requirements.txt
-
+```
 📦 4. Cách chạy project
 4.1. 🔧 Cài đặt môi trường
 Yêu cầu:
