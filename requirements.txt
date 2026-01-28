@@ -1,0 +1,14 @@
+requests
+beautifulsoup4
+pandas
+google-cloud-storage
+psycopg2-binary
+sqlalchemy
+python-dotenv
+schedule
+lxml
+fastparquet
+pyarrow
+apache-airflow
+kafka-python
+Faker

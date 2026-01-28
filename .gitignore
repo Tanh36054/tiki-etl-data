@@ -1,0 +1,109 @@
+
+# ----------------------------
+# Standard Python
+# ----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+/.venv/
+venv/
+env/
+ENV/
+.Python
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+
+# ----------------------------
+# Secrets & credentials
+# ----------------------------
+# dotenv files
+.env
+.env.*
+
+# Service account keys and other secret JSONs (project-specific secrets/ dir allowed)
+**/secrets/*.json
+*-sa.json
+*-key.json
+*-credentials.json
+*-creds.json
+*.pem
+
+# ----------------------------
+# Airflow
+# ----------------------------
+airflow.cfg
+airflow.db
+logs/  # airflow logs
+
+# ignore airflow temporary folders and __pycache__ inside dags/plugins
+dags/__pycache__/
+plugins/__pycache__/
+
+# ----------------------------
+# Spark / Big Data outputs
+# ----------------------------
+# Local spark warehouse, parquet/avro outputs
+spark-warehouse/
+*.parquet
+*.avro
+
+# JARs and binary artifacts
+*.jar
+
+# ----------------------------
+# Local data, temp and deployments
+# ----------------------------
+data/
+deployments/data/
+deployments/logs/
+secrets/
+tmp/
+temp/
+logs/
+*.log
+
+# Kafka and other runtime data
+deployments/kafka/data/
+
+# ----------------------------
+# Containers / Docker
+# ----------------------------
+docker-compose.override.yml
+docker-compose.*.yml
+**/docker-compose.override.yml
+
+# ----------------------------
+# Tests / coverage
+# ----------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ----------------------------
+# IDEs & Editors
+# ----------------------------
+.vscode/
+.idea/
+*.iml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Terraform
+infra/terraform/.terraform/
+*.tfstate
+*.tfstate.backup
+
+# OS
+.DS_Store
+Thumbs.db
